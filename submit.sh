@@ -1,1 +1,1 @@
-condor_submit project.sub
+condor_submit product.sub

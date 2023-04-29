@@ -1,6 +1,21 @@
-library(tidyverse)
-library(sentimentr)
-library(tidytext)
+
+if (require("tidyverse")) {
+  print("Loaded package tidyverse.")
+} else {
+  print("Failed to load package tidyverse.")  
+}
+
+if (require("sentimentr")) {
+  print("Loaded package sentimentr.")
+} else {
+  print("Failed to load package tidyverse.")  
+}
+
+if (require("tidytext")) {
+  print("Loaded package tidytext.")
+} else {
+  print("Failed to load package tidyverse.")  
+}
 
 rm(list=ls())
 

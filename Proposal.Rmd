@@ -1,0 +1,61 @@
+---
+title: "Proposal"
+author: "Group 1 - Rohit Poduri, Chao-Sheng Wu, Shichen Gao, Yubing Zhan"
+date: "2023-04-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Project Proposal: Sentiment Analysis of Customer Reviews on Amazon
+
+## Introduction
+
+**Customer Reviews** play a vital role in influencing consumer decisions in today's e-commerce landscape. Analyzing the sentiment of these reviews can offer a deeper understanding into the strengths and weaknesses of different products and brands. The aim of this project is to analyze the sentiment of customer reviews for different products sold by different brands in different regions on Amazon. The dataset used for this analysis is the [Amazon US Customer Reviews dataset](https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset), consisting of a wide array of reviews spanning from 1995 — 2015. Through the examination of the correlation between brand, region, and sentiment, we can gain deeper insights into consumer perceptions and how they fluctuate across different segments of the market.
+
+## Research Question
+
+Is there a notable difference in the sentiment of customer reviews for products sold by different brands, in different regions on Amazon?
+
+## Data Collection
+
+The dataset will be downloaded from the [Amazon Customer Reviews Dataset page on kaggle](https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset). We are using R to read in the data and preprocess it further for our analysis. 
+
+## Variables
+
+The variables we will be using for this analysis are as follows:
+1. *review_body* - The review text
+2. *product_id* - a unique identifier to group products from a particular region together
+3. *brand_name* - the brand of the product being reviewed, which can be extracted from the product_title and product_parent
+4. *marketplace* - the region where the review was written
+5. *star_rating* - the star rating of the product
+6. *review_date* - contains the date that each review was posted to help understand change in review sentiments over time
+7. *product_category* - to categorize the brands into different product categories (e.g., electronics, etc.)
+8. *helpful_votes* - the number of helpful votes that each review received
+9. *review_id* - a unique identifier for each review
+
+## Statistical Methods
+
+1. **Sentiment analysis**: We assign the sentiment of each review we consider to use in our dataset using a sentiment lexicon (e.g., AFINN). We will use the *tidytext* package to clean up the review text, and then the *dplyr* package for aggregating scores by brand/region.
+
+2. **Hypothesis testing**: We then use hypothesis testing to determine if there are significant differences in the sentiment of customer reviews for different brands/regions. The *t.test* function will help compare the mean scores for sentiments across the groups.
+
+3. **Regression analysis**: We will then conduct a regression analysis to determine the relationship between the sentiment of reviews and product category, brand, and region. For this we use the *lm* function for regression and the *anova* function for model comparison.
+
+## Computational Steps
+
+1. Download and preprocess data using R.
+2. Compute the sentiment the reviews using a sentiment lexicon.
+3. Group the data by category, brand and region.
+4. Perform hypothesis testing to determine to check whether there are significant differences in the sentiment for the reviews from different regions/brands.
+5. Fit regression models to understand the relationship between the sentiment of the reviews and the brand and region.
+
+## Github Repository
+
+Link to repo - https://github.com/cwu377/Group4_STAT405 - contains the code for retrieving the data.
+
+## Conclusion
+As mentioned above, the projects aims to analyze the sentiment of customer reviews of products offered by various brands in different regions on Amazon. Using a combination of sentiment analysis, hypothesis testing, and regression analysis, we hope to gain insights into the factors that affect the customer sentiment in reviews.
+

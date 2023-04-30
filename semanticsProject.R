@@ -1,4 +1,3 @@
-
 if (require("tidyverse")) {
   print("Loaded package tidyverse.")
 } else {
@@ -22,105 +21,50 @@ rm(list=ls())
 args = (commandArgs(trailingOnly=TRUE))
 
 if (length(args) < 1) {
-  stop("usage: Rscript hw4.R <data file>")
+  stop("usage: Rscript semanticsProject.R <data file>")
 }
 
-col_types <- cols(
-  marketplace = col_character(),
-  customer_id = col_character(),
-  review_id = col_character(),
-  product_id = col_character(),
-  product_parent = col_integer(),
-  product_title = col_character(),
-  product_category = col_character(),
-  star_rating = col_integer(),
-  helpful_votes = col_integer(),
-  total_votes = col_integer(),
-  vine = col_character(),
-  verified_purchase = col_character(),
-  review_headline = col_character(),
-  review_body = col_character(),
-  review_date = col_date(format = "%Y-%m-%d")
-)
-
 # Load the dataset
-df <- read_tsv(args[1], col_types = col_types)
-
-# Preprocess the data
-df_clean <- df %>%
-  select(review_id, review_body, star_rating, review_date, product_id, marketplace, product_category) %>%
-  mutate(review_body = str_to_lower(review_body)) %>%
-  unnest_tokens(word, review_body) %>%
-  anti_join(get_stopwords(language = "en"), by = "word") %>%
-  mutate(word = str_remove_all(word, "[^[:alnum:]]"),
-         word_len = str_length(word)) %>%
-  filter(word_len > 2) %>%
-  inner_join(get_sentiments("afinn"), by = "word") %>%
-  group_by(region = case_when(
-    marketplace %in% c("US", "CA", "MX") ~ "North America",
-    marketplace %in% c("UK", "DE", "FR", "IT", "ES") ~ "Europe",
-    marketplace %in% c("JP") ~ "Asia",
-    TRUE ~ "Other"
-  ), product_category) %>%
-  summarise(avg_sentiment = sum(value), .groups = "drop_last")
-
-out_file = paste(sep="", "df_clean", args[1], ".csv")
-write.csv(df_clean, file = out_file, row.names = FALSE)
+df_clean <- read_csv(args[1], col_types = col_types)
 
 # Visualize the results
-ggplot(data = df_clean, aes(x = region, y = avg_sentiment, fill = product_category)) + 
+ggplot(data = df_clean, aes(x = season, y = avg_sentiment, fill = product_category)) + 
   geom_bar(stat = "identity", position = "dodge") + 
-  ggtitle("Sentiment Analysis by Region and Category") + 
-  xlab("Region") + 
+  ggtitle("Sentiment Analysis by Season and Category") + 
+  xlab("Season") + 
   ylab("Average Sentiment")
 
-out_file2 = paste(sep="", args[1], "sentiment_plot.pdf")
-ggsave(out_file2, plot = last_plot())
+out_file1 = paste(sep="", args[1], "sentiment_plot.pdf")
+ggsave(out_file1, plot = last_plot())
 
 # Hypothesis Testing
-# Comparing the mean sentiment scores for different categories and regions
+# Comparing the mean sentiment scores for different categories and seasons
 
-# Perform t-test for mean sentiment scores
-ttest_na_eu <- t.test(df_clean$avg_sentiment[df_clean$region == "North America" & df_clean$product_category == "Personal Care Appliances"],
-                      df_clean$avg_sentiment[df_clean$region == "Europe" & df_clean$product_category == "Personal Care Appliances"])
-ttest_na_as <- t.test(df_clean$avg_sentiment[df_clean$region == "North America" & df_clean$product_category == "Personal Care Appliances"],
-                      df_clean$avg_sentiment[df_clean$region == "Asia" & df_clean$product_category == "Personal Care Appliances"])
-ttest_na_ot <- t.test(df_clean$avg_sentiment[df_clean$region == "North America" & df_clean$product_category == "Personal Care Appliances"],
-                      df_clean$avg_sentiment[df_clean$region == "Other" & df_clean$product_category == "Personal Care Appliances"])
+# Identify the top 5 categories by count of reviews
+top_categories <- names(sort(table(df_clean$product_category), decreasing = TRUE)[1:5])
 
-# Print the t-test results
-print(ttest_na_eu)
-print(ttest_na_as)
-print(ttest_na_ot)
+# Loop through the top categories and perform t-test for mean sentiment scores
+ttest_results <- list()
+for (category in top_categories) {
+  for (season in unique(df_clean$season)) {
+    ttest_result <- t.test(df_clean$avg_sentiment[df_clean$season == season & df_clean$product_category == category])
+    ttest_results[[paste(category, season)]] <- ttest_result
+  }
+}
 
-out_file3 = paste(sep="", "ttest_results", args[1], ".csv")
+# View the t-test results
+cat(ttest_results)
+out_file2 = paste(sep="", "ttest_", args[1], ".csv")
+write.csv(ttest_results, file = out_file2, row.names = FALSE)
 
-# Write the t-test results to a CSV file
-write.csv(list("NA vs. EU" = ttest_na_eu, "NA vs. Asia" = ttest_na_as, "NA vs. Other" = ttest_na_ot),
-          file = out_file3, row.names = FALSE)
 
-# Regression Analysis
-# Determining the relationship between sentiment of reviews and product category, brand, and region
+# Perform ANOVA for mean sentiment scores
+anova_result <- anova(aov(avg_sentiment ~ season * product_category, data = df_clean))
 
-# Subset the data for relevant variables
-df_relevant <- df_clean %>%
-  select(product_category, region, value)
+# View the ANOVA results
+cat(anova_result)
+out_file3 = paste(sep="", "anova_", args[1], ".csv")
+write.csv(anova_result, file = out_file3, row.names = FALSE)
 
-# Create dummy variables for categorical variables
-df_dummy <- df_relevant %>%
-  mutate(product_category = as.factor(product_category),
-         region = as.factor(region)) %>%
-  pivot_wider(names_from = product_category, values_from = value) %>%
-  pivot_wider(names_from = region, values_from = value)
 
-# Create the linear regression model
-model <- lm(. ~ ., data = df_dummy)
-
-# Perform ANOVA for model comparison
-anova(model)
-
-out_file4 = paste(sep="", "anova_results", args[1], ".csv")
-
-# Write the ANOVA results to a CSV file
-write.csv(summary(anova(model)), file = out_file4)
-         
+                                                     

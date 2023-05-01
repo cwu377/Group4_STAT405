@@ -48,7 +48,6 @@ afinn = read_delim("AFINN-111.txt", delim = "\t", col_names = c("word", "value")
 
 # Load the dataset
 df <- read_tsv(args[1], col_types = col_types)
-#df <- read_tsv("./Desktop/Rohit/Stat405/Group4_STAT405/data/amazon_reviews_us_Mobile_Electronics_v1_00.tsv", col_types = col_types)
 
 df <- df %>%
   mutate(season = case_when(
@@ -88,5 +87,5 @@ df_result <- df_result %>%
     TRUE ~ "neutral"
   ))
 
-out_file = paste(sep="", "/home/groups/STAT_DSCP/group1_Spring2023/df_result_", args[1], ".csv")
+out_file = paste(sep="", "df_result_", args[1], ".csv")
 write.csv(df_result, file = out_file, row.names = FALSE)

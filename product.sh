@@ -15,5 +15,5 @@ export RHOME=$PWD/R
 export R_LIBS=$PWD/packages
 
 # run your script
-Rscript semanticsProject.R $1
+Rscript read_data.R $1
 

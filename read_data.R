@@ -88,5 +88,5 @@ df_result <- df_result %>%
     TRUE ~ "neutral"
   ))
 
-out_file = paste(sep="", "df_result_", args[1], ".csv")
+out_file = paste(sep="", "/home/groups/STAT_DSCP/group1_Spring2023/df_result_", args[1], ".csv")
 write.csv(df_result, file = out_file, row.names = FALSE)

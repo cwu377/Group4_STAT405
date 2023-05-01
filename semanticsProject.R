@@ -60,6 +60,7 @@ ggplot(df_season_sentiment, aes(x = season, y = num_reviews, fill = sentiment_ca
        y = "Number of Reviews") +
   scale_fill_manual(values = c("#FC4E07", "#FEB019", "#00AFBB"), labels = c("Negative", "Neutral", "Positive"))
 
+dev.off()
 out_file1 = paste(sep="", args[1], "sentiment_plot.pdf")
 ggsave(out_file1, plot = last_plot())
 

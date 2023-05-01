@@ -24,6 +24,24 @@ if (length(args) < 1) {
   stop("usage: Rscript semanticsProject.R <data file>")
 }
 
+col_types <- cols(
+  marketplace = col_character(),
+  customer_id = col_character(),
+  review_id = col_character(),
+  product_id = col_character(),
+  product_parent = col_integer(),
+  product_title = col_character(),
+  product_category = col_character(),
+  star_rating = col_integer(),
+  helpful_votes = col_integer(),
+  total_votes = col_integer(),
+  vine = col_character(),
+  verified_purchase = col_character(),
+  review_headline = col_character(),
+  review_body = col_character(),
+  review_date = col_date(format = "%Y-%m-%d")
+)
+
 # Load the dataset
 df_result <- read_csv(args[1], col_types = col_types)
 

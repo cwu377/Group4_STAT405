@@ -25,14 +25,22 @@ if (length(args) < 1) {
 }
 
 # Load the dataset
-df_clean <- read_csv(args[1], col_types = col_types)
+df_result <- read_csv(args[1], col_types = col_types)
 
-# Visualize the results
-ggplot(data = df_clean, aes(x = season, y = avg_sentiment, fill = product_category)) + 
-  geom_bar(stat = "identity", position = "dodge") + 
-  ggtitle("Sentiment Analysis by Season and Category") + 
-  xlab("Season") + 
-  ylab("Average Sentiment")
+# Group the results by season and sentiment category
+df_season_sentiment <- df_result %>%
+  group_by(season, product_category, sentiment_category) %>%
+  summarize(num_reviews = n()) %>%
+  ungroup()
+
+# Create a grouped bar chart of sentiment by season and category
+ggplot(df_season_sentiment, aes(x = season, y = num_reviews, fill = sentiment_category)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ product_category, ncol = 2) +
+  labs(title = "Sentiment by Season and Category",
+       x = "Season",
+       y = "Number of Reviews") +
+  scale_fill_manual(values = c("#FC4E07", "#FEB019", "#00AFBB"), labels = c("Negative", "Neutral", "Positive"))
 
 out_file1 = paste(sep="", args[1], "sentiment_plot.pdf")
 ggsave(out_file1, plot = last_plot())

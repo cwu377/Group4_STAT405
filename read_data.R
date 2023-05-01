@@ -42,28 +42,51 @@ col_types <- cols(
   review_date = col_date(format = "%Y-%m-%d")
 )
 
+# Load the AFINN lexicon
+afinn = read_delim("AFINN-111.txt", delim = "\t", col_names = c("word", "value"), col_types = cols(word = col_character(), value = col_integer()), skip = 0)
+
+
 # Load the dataset
 df <- read_tsv(args[1], col_types = col_types)
+#df <- read_tsv("./Desktop/Rohit/Stat405/Group4_STAT405/data/amazon_reviews_us_Mobile_Electronics_v1_00.tsv", col_types = col_types)
 
-# df <- read_tsv("./Desktop/Rohit/Stat405/Group4_STAT405/data/amazon_reviews_us_Mobile_Electronics_v1_00.tsv", col_types = col_types)
+df <- df %>%
+  mutate(season = case_when(
+    as.numeric(format(review_date, "%m")) %in% 3:5 ~ "Spring",
+    as.numeric(format(review_date, "%m")) %in% 6:8 ~ "Summer",
+    as.numeric(format(review_date, "%m")) %in% 9:11 ~ "Fall",
+    TRUE ~ "Winter"))
 
 # Preprocess the data
 df_clean <- df %>%
   select(review_id, review_body, star_rating, review_date, product_id, marketplace, product_category) %>%
-  mutate(review_body = str_to_lower(review_body)) %>%
+  mutate(review_body = str_to_lower(review_body)) %>% 
   unnest_tokens(word, review_body) %>%
   anti_join(get_stopwords(language = "en"), by = "word") %>%
   mutate(word = str_remove_all(word, "[^[:alnum:]]"),
          word_len = str_length(word)) %>%
-  filter(word_len > 2) %>%
-  inner_join(get_sentiments("afinn"), by = "word") %>%
-  group_by(season = case_when(
-    as.numeric(format(review_date, "%m")) %in% 3:5 ~ "Spring",
-    as.numeric(format(review_date, "%m")) %in% 6:8 ~ "Summer",
-    as.numeric(format(review_date, "%m")) %in% 9:11 ~ "Fall",
-    TRUE ~ "Winter"
-  ), product_category) %>%
-  summarise(avg_sentiment = sum(value), .groups = "drop_last")
+  filter(word_len > 2) 
 
-out_file = paste(sep="", "df_clean", args[1], ".csv")
-write.csv(df_clean, file = out_file, row.names = FALSE)
+# Calculate the sentiment score for the whole review
+df_sentiment <- df_clean %>%
+  group_by(review_id, product_category) %>%
+  summarize(sentiment = sum(afinn$value[match(word, afinn$word)], na.rm = TRUE)) %>%
+  ungroup() %>% 
+  rename(product_category_s = product_category)
+
+# Join the sentiment score to the original dataset
+df_result <- df %>%
+  select(-review_body) %>%
+  inner_join(df_sentiment, by = "review_id")
+
+
+# Categorize sentiment as positive, negative, or neutral
+df_result <- df_result %>%
+  mutate(sentiment_category = case_when(
+    sentiment > 0 ~ "positive",
+    sentiment < 0 ~ "negative",
+    TRUE ~ "neutral"
+  ))
+
+out_file = paste(sep="", "df_result_", args[1], ".csv")
+write.csv(df_result, file = out_file, row.names = FALSE)

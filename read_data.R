@@ -49,7 +49,7 @@ afinn = read_delim("AFINN-111.txt", delim = "\t", col_names = c("word", "value")
 # Load the dataset
 df <- read_tsv(args[1], col_types = col_types)
 
-df <- df %>%
+df <- df %>% select(review_id, review_body, star_rating, review_date, product_id, product_category) %>%
   mutate(season = case_when(
     as.numeric(format(review_date, "%m")) %in% 3:5 ~ "Spring",
     as.numeric(format(review_date, "%m")) %in% 6:8 ~ "Summer",
@@ -58,7 +58,6 @@ df <- df %>%
 
 # Preprocess the data
 df_clean <- df %>%
-  select(review_id, review_body, star_rating, review_date, product_id, marketplace, product_category) %>%
   mutate(review_body = str_to_lower(review_body)) %>% 
   unnest_tokens(word, review_body) %>%
   anti_join(get_stopwords(language = "en"), by = "word") %>%

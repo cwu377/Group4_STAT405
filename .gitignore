@@ -1,1 +1,4 @@
-data/
+log/
+error/
+output/
+df_result_amazon*

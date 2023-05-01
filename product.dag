@@ -1,0 +1,25 @@
+# Run "condor_submit_dag sd.dag" to cause all the code specified in
+# the following Directed Acyclic Graph (DAG), below, to run:
+#
+# (pre 1)  shuffle.sh
+#              |
+#              V
+# (job 1)  product.sub
+#            / | \
+#   fourteen parallel runs of product.sh
+#            \ | /
+#              V
+# (job 2)  plot.sub
+#            / | \
+#   fourteen parallel runs of plot.sh
+
+# Run "condor_submit_dag product.dag" to cause all the code specified in
+# the DAG to run in the correct order.
+
+job 1 product.sub
+job 2 plot.sub
+
+script pre 1 shuffle.sh
+
+
+parent 1 child 2

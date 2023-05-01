@@ -19,7 +19,7 @@ transfer_input_files = http://proxy.chtc.wisc.edu/SQUID/chtc/el8/R413.tar.gz, re
 
 
 request_cpus = 1
-request_memory = 3GB
-request_disk = 3GB
+request_memory = 60GB
+request_disk = 6GB
 
 queue file from inputFilelist
